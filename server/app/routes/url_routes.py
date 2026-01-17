@@ -40,3 +40,20 @@ def redirect_short_url(short_code):
     db.session.commit()
 
     return redirect(url.original_url, code=302)
+
+@url_bp.route("/list", methods=["GET"])
+@jwt_required()
+def list_short_urls():
+    user_id = get_jwt_identity()
+    urls = ShortUrl.query.filter_by(user_id=user_id).all()
+
+    return jsonify({
+        "urls": [
+            {
+                "original_url": url.original_url,
+                "short_code": url.short_code,
+                "clicks": url.clicks
+            }
+            for url in urls
+        ]
+    })
